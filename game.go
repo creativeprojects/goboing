@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/audio"
+	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 type Game struct {
@@ -34,6 +35,19 @@ func NewGame() (*Game, error) {
 }
 
 func (g *Game) Update(screen *ebiten.Image) error {
+	if g.state == StateMenu {
+		if inpututil.IsKeyJustPressed(ebiten.KeyUp) || inpututil.IsKeyJustPressed(ebiten.KeyDown) {
+			if g.totalPlayers == 1 {
+				g.totalPlayers = 2
+			} else {
+				g.totalPlayers = 1
+			}
+		}
+
+		if inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			g.state = StatePlaying
+		}
+	}
 	return nil
 }
 
