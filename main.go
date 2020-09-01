@@ -5,24 +5,37 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/audio"
 )
 
 var (
-	images map[string]*ebiten.Image
+	images     map[string]*ebiten.Image
+	sounds     map[string][]byte
+	imageNames = []string{"table", "menu0", "menu1", "over"}
+	soundNames = []string{"down", "up"}
 )
 
-func init() {
+func main() {
 	var err error
-	images, err = loadImages([]string{"table.png", "menu0.png", "menu1.png", "over.png"})
+	images, err = loadImages(imageNames)
 	if err != nil {
 		log.Fatal(err)
 	}
-}
 
-func main() {
+	audioContext, err := audio.NewContext(SampleRate)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sounds, err = loadSounds(audioContext, soundNames)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ebiten.SetRunnableOnUnfocused(true)
 	ebiten.SetWindowSize(WindowWidth, WindowHeight)
 	ebiten.SetWindowTitle(WindowTitle)
-	game, err := NewGame()
+	game, err := NewGame(audioContext)
 	if err != nil {
 		log.Fatal(err)
 	}

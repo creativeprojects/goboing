@@ -2,14 +2,15 @@ package main
 
 import (
 	"io/ioutil"
+	"log"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/vorbis"
 )
 
-// Player represents the current audio state.
-type Player struct {
+// AudioPlayer represents the current audio state.
+type AudioPlayer struct {
 	audioContext *audio.Context
 	audioPlayer  *audio.Player
 	current      time.Duration
@@ -19,7 +20,7 @@ type Player struct {
 	volume128    int
 }
 
-func NewPlayer(audioContext *audio.Context) (*Player, error) {
+func NewPlayer(audioContext *audio.Context) (*AudioPlayer, error) {
 	type audioStream interface {
 		audio.ReadSeekCloser
 		Length() int64
@@ -42,38 +43,27 @@ func NewPlayer(audioContext *audio.Context) (*Player, error) {
 	if err != nil {
 		return nil, err
 	}
-	player := &Player{
+	player := &AudioPlayer{
 		audioContext: audioContext,
 		audioPlayer:  p,
 		total:        time.Second * time.Duration(s.Length()) / bytesPerSample / SampleRate,
-		volume128:    128,
+		volume128:    32,
 		seCh:         make(chan []byte),
 	}
 	if player.total == 0 {
 		player.total = 1
 	}
+	player.audioPlayer.SetVolume(float64(player.volume128) / 128)
 	player.audioPlayer.Play()
-	// go func() {
-	// 	s, err := wav.Decode(audioContext, audio.BytesReadSeekCloser(raudio.Jab_wav))
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 		return
-	// 	}
-	// 	b, err := ioutil.ReadAll(s)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 		return
-	// 	}
-	// 	player.seCh <- b
-	// }()
+
 	return player, nil
 }
 
-func (p *Player) Close() error {
+func (p *AudioPlayer) Close() error {
 	return p.audioPlayer.Close()
 }
 
-func (p *Player) update() error {
+func (p *AudioPlayer) update() error {
 	select {
 	case p.seBytes = <-p.seCh:
 		close(p.seCh)
@@ -85,4 +75,18 @@ func (p *Player) update() error {
 		p.current = p.audioPlayer.Current()
 	}
 	return nil
+}
+
+// PlaySE plays a sound effect.
+func PlaySE(audioContext *audio.Context, bs []byte) {
+	if bs == nil || len(bs) == 0 {
+		log.Printf("cannot play empty sound")
+		return
+	}
+	sePlayer, err := audio.NewPlayerFromBytes(audioContext, bs)
+	if err != nil {
+		log.Printf("error playing sound effect: %v", err)
+	}
+	// sePlayer is never GCed as long as it plays.
+	sePlayer.Play()
 }
