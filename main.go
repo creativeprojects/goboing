@@ -5,31 +5,15 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 var (
-	imageTable    *ebiten.Image
-	imageMenu1    *ebiten.Image
-	imageMenu2    *ebiten.Image
-	imageGameOver *ebiten.Image
+	images map[string]*ebiten.Image
 )
 
 func init() {
 	var err error
-	imageTable, _, err = ebitenutil.NewImageFromFile("images/table.png", ebiten.FilterDefault)
-	if err != nil {
-		log.Fatal(err)
-	}
-	imageMenu1, _, err = ebitenutil.NewImageFromFile("images/menu0.png", ebiten.FilterDefault)
-	if err != nil {
-		log.Fatal(err)
-	}
-	imageMenu2, _, err = ebitenutil.NewImageFromFile("images/menu1.png", ebiten.FilterDefault)
-	if err != nil {
-		log.Fatal(err)
-	}
-	imageGameOver, _, err = ebitenutil.NewImageFromFile("images/over.png", ebiten.FilterDefault)
+	images, err = loadImages([]string{"table.png", "menu0.png", "menu1.png", "over.png"})
 	if err != nil {
 		log.Fatal(err)
 	}

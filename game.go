@@ -55,14 +55,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	switch g.state {
 	case StateMenu:
 		if g.totalPlayers == 1 {
-			screen.DrawImage(imageMenu1, nil)
+			screen.DrawImage(images["menu0.png"], nil)
 		} else {
-			screen.DrawImage(imageMenu2, nil)
+			screen.DrawImage(images["menu1.png"], nil)
 		}
 	case StatePlaying:
-		screen.DrawImage(imageTable, nil)
+		screen.DrawImage(images["table.png"], nil)
 	case StateGameOver:
-		screen.DrawImage(imageGameOver, nil)
+		screen.DrawImage(images["over.png"], nil)
 	}
 }
 
