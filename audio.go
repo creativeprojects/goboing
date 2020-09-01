@@ -20,7 +20,7 @@ type AudioPlayer struct {
 	volume128    int
 }
 
-func NewPlayer(audioContext *audio.Context) (*AudioPlayer, error) {
+func NewAudioPlayer(audioContext *audio.Context) (*AudioPlayer, error) {
 	type audioStream interface {
 		audio.ReadSeekCloser
 		Length() int64

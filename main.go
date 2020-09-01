@@ -11,8 +11,10 @@ import (
 var (
 	images     map[string]*ebiten.Image
 	sounds     map[string][]byte
-	imageNames = []string{"table", "menu0", "menu1", "over"}
-	soundNames = []string{"down", "up"}
+	imageNames = []string{"table", "menu0", "menu1", "over", "bat00", "bat01", "bat02", "bat10", "bat11", "bat12", "ball"}
+	soundNames = []string{"down", "up", "hit0", "hit1", "hit2", "hit3", "hit4"}
+	// TODO: remove this global
+	game *Game
 )
 
 func main() {
@@ -35,7 +37,7 @@ func main() {
 	ebiten.SetRunnableOnUnfocused(true)
 	ebiten.SetWindowSize(WindowWidth, WindowHeight)
 	ebiten.SetWindowTitle(WindowTitle)
-	game, err := NewGame(audioContext)
+	game, err = NewGame(audioContext)
 	if err != nil {
 		log.Fatal(err)
 	}
