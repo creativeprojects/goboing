@@ -10,7 +10,7 @@ BINARY=boing
 TESTS=./...
 COVERAGE_FILE=coverage.out
 
-.PHONY: all test build coverage clean generate
+.PHONY: all test build coverage clean resources
 
 all: test build
 
@@ -28,5 +28,5 @@ clean:
 		$(GOCLEAN)
 		rm -f $(BINARY) $(COVERAGE_FILE)
 
-generate:
+resources:
 		$(GORUN) github.com/markbates/pkger/cmd/pkger -include /images -include /music -include /sounds

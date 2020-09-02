@@ -3,20 +3,16 @@ package main
 import (
 	"io/ioutil"
 	"log"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/vorbis"
+	"github.com/markbates/pkger"
 )
 
 // AudioPlayer represents the current audio state.
 type AudioPlayer struct {
 	audioContext *audio.Context
 	audioPlayer  *audio.Player
-	current      time.Duration
-	total        time.Duration
-	seBytes      []byte
-	seCh         chan []byte
 	volume128    int
 }
 
@@ -30,7 +26,12 @@ func NewAudioPlayer(audioContext *audio.Context) (*AudioPlayer, error) {
 
 	var s audioStream
 	var err error
-	theme, err := ioutil.ReadFile("music/theme.ogg")
+	file, err := pkger.Open("/music/theme.ogg")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	theme, err := ioutil.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}
@@ -39,42 +40,23 @@ func NewAudioPlayer(audioContext *audio.Context) (*AudioPlayer, error) {
 		return nil, err
 	}
 
-	p, err := audio.NewPlayer(audioContext, s)
+	p, err := audio.NewPlayer(audioContext, audio.NewInfiniteLoop(s, s.Length()))
 	if err != nil {
 		return nil, err
 	}
 	player := &AudioPlayer{
 		audioContext: audioContext,
 		audioPlayer:  p,
-		total:        time.Second * time.Duration(s.Length()) / bytesPerSample / SampleRate,
 		volume128:    32,
-		seCh:         make(chan []byte),
-	}
-	if player.total == 0 {
-		player.total = 1
 	}
 	player.audioPlayer.SetVolume(float64(player.volume128) / 128)
-	player.audioPlayer.Play()
+	// player.audioPlayer.Play()
 
 	return player, nil
 }
 
 func (p *AudioPlayer) Close() error {
 	return p.audioPlayer.Close()
-}
-
-func (p *AudioPlayer) update() error {
-	select {
-	case p.seBytes = <-p.seCh:
-		close(p.seCh)
-		p.seCh = nil
-	default:
-	}
-
-	if p.audioPlayer.IsPlaying() {
-		p.current = p.audioPlayer.Current()
-	}
-	return nil
 }
 
 // PlaySE plays a sound effect.

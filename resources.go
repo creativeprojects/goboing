@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 
 	_ "image/png"
@@ -16,16 +17,16 @@ func loadImages(imageNames []string) (map[string]*ebiten.Image, error) {
 	for _, imageName := range imageNames {
 		file, err := pkger.Open("/images/" + imageName + ".png")
 		if err != nil {
-			return imagesMap, err
+			return imagesMap, fmt.Errorf("%s: %w", imageName, err)
 		}
 		defer file.Close()
 		img, _, err := image.Decode(file)
 		if err != nil {
-			return imagesMap, err
+			return imagesMap, fmt.Errorf("%s: %w", imageName, err)
 		}
 		img2, err := ebiten.NewImageFromImage(img, ebiten.FilterDefault)
 		if err != nil {
-			return imagesMap, err
+			return imagesMap, fmt.Errorf("%s: %w", imageName, err)
 		}
 		imagesMap[imageName] = img2
 	}
@@ -37,18 +38,18 @@ func loadSounds(context *audio.Context, soundNames []string) (map[string][]byte,
 	for _, soundName := range soundNames {
 		file, err := pkger.Open("/sounds/" + soundName + ".ogg")
 		if err != nil {
-			return soundsMap, err
+			return soundsMap, fmt.Errorf("%s: %w", soundName, err)
 		}
 		defer file.Close()
 		snd, err := vorbis.Decode(context, file)
 		if err != nil {
-			return soundsMap, err
+			return soundsMap, fmt.Errorf("%s: %w", soundName, err)
 		}
 		defer snd.Close()
 		buf := make([]byte, snd.Length())
 		_, err = snd.Read(buf)
 		if err != nil {
-			return soundsMap, err
+			return soundsMap, fmt.Errorf("%s: %w", soundName, err)
 		}
 		soundsMap[soundName] = buf
 	}

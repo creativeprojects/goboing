@@ -1,20 +1,22 @@
 package main
 
-type PlayerType int
+// PlayerPosition for left or right player
+type PlayerPosition int
 
 const (
-	PlayerLeft PlayerType = iota
+	PlayerLeft PlayerPosition = iota
 	PlayerRight
 )
 
 type Player struct {
-	which PlayerType
-	score int
+	game     *Game
+	position PlayerPosition
+	score    int
 }
 
-func NewPlayer(which PlayerType) *Player {
+func NewPlayer(position PlayerPosition) *Player {
 	return &Player{
-		which: which,
-		score: 0,
+		position: position,
+		score:    0,
 	}
 }

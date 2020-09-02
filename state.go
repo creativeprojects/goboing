@@ -1,11 +1,11 @@
 package main
 
-// State is menu / playing / game over
-type State int
+// GameState is menu / playing / paused / game over
+type GameState int
 
 // Current state
 const (
-	StateMenu State = iota
+	StateMenu GameState = iota
 	StatePlaying
 	StatePaused
 	StateGameOver

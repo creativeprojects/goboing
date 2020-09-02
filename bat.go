@@ -17,11 +17,11 @@ var (
 )
 
 type Bat struct {
+	// game   *Game
 	player *Player
 	images [3]*ebiten.Image
 	op     *ebiten.DrawImageOptions
-	x      float64
-	y      float64
+	pos    Position
 	timer  int
 	status int
 }
@@ -29,7 +29,7 @@ type Bat struct {
 func NewBat(player *Player) *Bat {
 	x := -40.0
 	imagePrefix := "bat0"
-	if player.which == PlayerRight {
+	if player.position == PlayerRight {
 		x = 680
 		imagePrefix = "bat1"
 	}
@@ -41,8 +41,7 @@ func NewBat(player *Player) *Bat {
 			images[imagePrefix+"2"],
 		},
 		op:     &ebiten.DrawImageOptions{},
-		x:      x,
-		y:      HalfHeight - 80,
+		pos:    NewPositionAbsolute(BatWidth, BatHeight, x, HalfHeight-80),
 		timer:  0,
 		status: 0,
 	}
@@ -60,19 +59,41 @@ func (b *Bat) Update() {
 
 func (b *Bat) Draw(screen *ebiten.Image) {
 	b.op.GeoM.Reset()
-	b.op.GeoM.Translate(b.x, b.y)
+	b.op.GeoM.Translate(b.pos.AbsoluteX(), b.pos.AbsoluteY())
 	screen.DrawImage(b.images[b.status], b.op)
 }
 
 func (b *Bat) MoveUp(speed float64) {
-	b.y = math.Max(batTopY, b.y-speed)
+	b.pos = b.pos.MoveAbsolute(b.pos.AbsoluteX(), math.Max(batTopY, b.pos.AbsoluteY()-speed))
 }
 
 func (b *Bat) MoveDown(speed float64) {
-	b.y = math.Min(batBottomY, b.y+speed)
+	b.pos = b.pos.MoveAbsolute(b.pos.AbsoluteX(), math.Min(batBottomY, b.pos.AbsoluteY()+speed))
 }
 
 func (b *Bat) Glow() {
 	b.timer = 10
 	b.status = 1
+}
+
+// CentreY returns the position (on the Y axis) of the centre of the bat
+func (b *Bat) CentreY() float64 {
+	return b.pos.CentreY()
+}
+
+// AI player move
+func (b *Bat) AI(ballX, ballY, aiOffset float64) {
+	distanceX := math.Abs(ballX - b.pos.CentreX())
+	targetY1 := float64(HalfHeight)
+	targetY2 := ballY + aiOffset
+	weight1 := math.Min(1, distanceX/HalfWidth)
+	weight2 := 1 - weight1
+	targetY := (weight1 * targetY1) + (weight2 * targetY2)
+	move := math.Min(AISpeed, math.Max(-AISpeed, targetY-b.pos.CentreY()))
+	switch {
+	case move > 0:
+		b.MoveDown(move)
+	case move < 0:
+		b.MoveUp(-move)
+	}
 }
