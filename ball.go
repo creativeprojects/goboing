@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
+// Ball dimensions
 const (
 	BallWidth    = 24.0
 	BallHeight   = 24.0
@@ -14,6 +15,7 @@ const (
 	BatRightEdge = WindowWidth - 66
 )
 
+// Ball describes the ball in the game
 type Ball struct {
 	game          *Game
 	image         *ebiten.Image
@@ -57,6 +59,7 @@ func (b *Ball) Reset(direction float64) *Ball {
 	return b
 }
 
+// Update ball movements
 func (b *Ball) Update() {
 	// We loop to add the same increment on the ball for n times the speed
 	// The collision detection runs on each incremental step so the ball is not going too far
@@ -103,6 +106,7 @@ func (b *Ball) IsOut() bool {
 	return (b.pos.AbsoluteX() < 0.0) || (b.pos.AbsoluteX()+BallWidth > WindowWidth)
 }
 
+// Draw the ball on the screen
 func (b *Ball) Draw(screen *ebiten.Image) {
 	b.op.GeoM.Reset()
 	b.op.GeoM.Translate(b.pos.AbsoluteX(), b.pos.AbsoluteY())

@@ -50,7 +50,7 @@ func NewAudioPlayer(audioContext *audio.Context) (*AudioPlayer, error) {
 		volume128:    32,
 	}
 	player.audioPlayer.SetVolume(float64(player.volume128) / 128)
-	// player.audioPlayer.Play()
+	player.audioPlayer.Play()
 
 	return player, nil
 }

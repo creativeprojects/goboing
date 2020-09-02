@@ -41,16 +41,16 @@ func NewGame(audioContext *audio.Context) (*Game, error) {
 		return nil, err
 	}
 	ball := NewBall()
+	player1 := NewPlayer(PlayerLeft)
+	player2 := NewPlayer(PlayerRight)
 	g := &Game{
 		audioContext: audioContext,
 		musicPlayer:  m,
 		state:        StateMenu,
-		bats: [2]*Bat{
-			NewBat(NewPlayer(PlayerLeft)),
-			NewBat(NewPlayer(PlayerRight)),
-		},
-		ball:    ball,
-		impacts: make([]*Impact, 0, StartImpacts),
+		players:      [2]*Player{player1, player2},
+		bats:         [2]*Bat{NewBat(player1), NewBat(player2)},
+		ball:         ball,
+		impacts:      make([]*Impact, 0, StartImpacts),
 	}
 	// circular references
 	ball.game = g
@@ -116,10 +116,11 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	if g.state == StatePlaying {
 		// Escape
 		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+			g.Reset()
 			g.state = StateMenu
 		}
 		// Pause
-		if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		if inpututil.IsKeyJustPressed(ebiten.KeyP) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 			g.state = StatePaused
 		}
 
@@ -153,20 +154,64 @@ func (g *Game) Update(screen *ebiten.Image) error {
 		}
 		g.ball.Update()
 
+		for _, player := range g.players {
+			player.Update()
+		}
+
 		if g.ball.IsOut() {
-			g.SoundEffect(sounds["score_goal"])
-			g.ball.Reset(1)
+			var scoringPlayer, losingPlayer PlayerPosition
+			if g.ball.pos.absoluteX < HalfWidth {
+				scoringPlayer = PlayerRight
+				losingPlayer = PlayerLeft
+			} else {
+				scoringPlayer = PlayerLeft
+				losingPlayer = PlayerRight
+			}
+			if g.players[losingPlayer].State() == PlayerStatePlaying {
+				g.players[scoringPlayer].BallWin()
+				g.players[losingPlayer].BallLost()
+				g.SoundEffect(sounds["score_goal"])
+			}
+			if g.players[losingPlayer].State() == PlayerStateReady {
+				direction := 1.0
+				if losingPlayer == PlayerLeft {
+					direction = -1
+				}
+				g.ball.Reset(direction)
+			}
+			if g.players[scoringPlayer].State() == PlayerWinningScore {
+				// Game finished!
+				g.state = StateGameOver
+			}
 		}
 		return nil
 	}
 
 	if g.state == StatePaused {
-		if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		// un-pause
+		if inpututil.IsKeyJustPressed(ebiten.KeyP) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 			g.state = StatePlaying
 		}
 		return nil
 	}
+
+	if g.state == StateGameOver {
+		// un-pause
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) || inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+			g.Reset()
+			g.state = StateMenu
+		}
+		return nil
+	}
 	return nil
+}
+
+// Reset game ready for a new one
+func (g *Game) Reset() {
+	for _, player := range g.players {
+		player.Reset()
+	}
+	g.ball.Reset(-1)
 }
 
 // Draw game events
@@ -196,6 +241,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		impact.Draw(screen)
 	}
 
+	for _, player := range g.players {
+		player.Draw(screen)
+	}
+
 	if g.debug {
 		g.displayDebug(screen)
 	}
@@ -220,7 +269,7 @@ func (g *Game) NewImpact(x, y float64) {
 }
 
 func (g *Game) displayDebug(screen *ebiten.Image) {
-	template := " TPS: %0.2f \n Left bat: %0.0f \n Right bat: %0.0f \n Ball: %0.0f, %0.0f \n Impacts: %d \n"
+	template := " TPS: %0.2f \n Left bat: %0.0f \n Right bat: %0.0f \n Ball: %0.0f, %0.0f \n Impacts: %d \n Score: %0.0f / %0.0f"
 	msg := fmt.Sprintf(template,
 		ebiten.CurrentTPS(),
 		g.bats[0].CentreY(),
@@ -228,6 +277,8 @@ func (g *Game) displayDebug(screen *ebiten.Image) {
 		g.ball.CentreX(),
 		g.ball.CentreY(),
 		len(g.impacts),
+		g.players[PlayerLeft].score,
+		g.players[PlayerRight].score,
 	)
 	ebitenutil.DebugPrint(screen, msg)
 }
