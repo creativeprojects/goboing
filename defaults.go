@@ -7,8 +7,9 @@ const (
 	HalfHeight        = WindowHeight / 2
 	WindowTitle       = "Boing!"
 	SampleRate        = 44100
-	PlayerSpeed       = 6.0
-	AISpeed           = 6.0
+	PlayerStartSpeed  = 4.0
+	PlayerMaxSpeed    = 12.0
+	AIMaxSpeed        = 6.0
 	BallStartingSpeed = 5
 	BallMaxSpeed      = 20
 	WinningScore      = 10.0

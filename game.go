@@ -126,20 +126,22 @@ func (g *Game) Update(screen *ebiten.Image) error {
 
 		if g.totalPlayers > 0 {
 			if ebiten.IsKeyPressed(ebiten.KeyA) {
-				g.bats[PlayerLeft].MoveUp(PlayerSpeed)
-			}
-			if ebiten.IsKeyPressed(ebiten.KeyZ) {
-				g.bats[PlayerLeft].MoveDown(PlayerSpeed)
+				g.bats[PlayerLeft].MoveUp()
+			} else if ebiten.IsKeyPressed(ebiten.KeyZ) {
+				g.bats[PlayerLeft].MoveDown()
+			} else {
+				g.bats[PlayerLeft].StopMoving()
 			}
 		} else {
 			g.bats[PlayerLeft].AI(g.ball.pos.CentreX(), g.ball.pos.CentreY(), g.aiOffset)
 		}
 		if g.totalPlayers > 1 {
 			if ebiten.IsKeyPressed(ebiten.KeyK) {
-				g.bats[PlayerRight].MoveUp(PlayerSpeed)
-			}
-			if ebiten.IsKeyPressed(ebiten.KeyM) {
-				g.bats[PlayerRight].MoveDown(PlayerSpeed)
+				g.bats[PlayerRight].MoveUp()
+			} else if ebiten.IsKeyPressed(ebiten.KeyM) {
+				g.bats[PlayerRight].MoveDown()
+			} else {
+				g.bats[PlayerLeft].StopMoving()
 			}
 		} else {
 			g.bats[PlayerRight].AI(g.ball.pos.CentreX(), g.ball.pos.CentreY(), g.aiOffset)

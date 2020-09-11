@@ -25,6 +25,8 @@ type Bat struct {
 	pos    Position
 	timer  int
 	status int
+	speed  float64
+	moving int
 }
 
 // NewBat creates a new bat for the player
@@ -46,6 +48,7 @@ func NewBat(player *Player) *Bat {
 		pos:    NewPositionAbsolute(BatWidth, BatHeight, x, HalfHeight-80),
 		timer:  0,
 		status: 0,
+		moving: 0,
 	}
 }
 
@@ -67,13 +70,38 @@ func (b *Bat) Draw(screen *ebiten.Image) {
 	screen.DrawImage(b.images[b.status], b.op)
 }
 
-// MoveUp moves the bat up at a specific speed
-func (b *Bat) MoveUp(speed float64) {
+// StopMoving stops the bat and reset to the initial speed
+func (b *Bat) StopMoving() {
+	b.moving = 0
+}
+
+// MoveUp moves the bat up at an increasing speed
+func (b *Bat) MoveUp() {
+	if b.moving > -1 {
+		// reset the speed
+		b.speed = PlayerStartSpeed
+		b.moving = -1
+	}
+	b.moveUp(b.speed)
+	b.speed++
+}
+
+func (b *Bat) moveUp(speed float64) {
 	b.pos = b.pos.MoveAbsolute(b.pos.AbsoluteX(), math.Max(batTopY, b.pos.AbsoluteY()-speed))
 }
 
-// MoveDown moves the bat down at a specific speed
-func (b *Bat) MoveDown(speed float64) {
+// MoveDown moves the bat down at an increasing speed
+func (b *Bat) MoveDown() {
+	if b.moving < 1 {
+		// reset the speed
+		b.speed = PlayerStartSpeed
+		b.moving = 1
+	}
+	b.moveDown(b.speed)
+	b.speed++
+}
+
+func (b *Bat) moveDown(speed float64) {
 	b.pos = b.pos.MoveAbsolute(b.pos.AbsoluteX(), math.Min(batBottomY, b.pos.AbsoluteY()+speed))
 }
 
@@ -96,11 +124,11 @@ func (b *Bat) AI(ballX, ballY, aiOffset float64) {
 	weight1 := math.Min(1, distanceX/HalfWidth)
 	weight2 := 1 - weight1
 	targetY := (weight1 * targetY1) + (weight2 * targetY2)
-	move := math.Min(AISpeed, math.Max(-AISpeed, targetY-b.pos.CentreY()))
+	move := math.Min(AIMaxSpeed, math.Max(-AIMaxSpeed, targetY-b.pos.CentreY()))
 	switch {
 	case move > 0:
-		b.MoveDown(move)
+		b.moveDown(move)
 	case move < 0:
-		b.MoveUp(-move)
+		b.moveUp(-move)
 	}
 }
