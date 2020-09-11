@@ -141,7 +141,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 			} else if ebiten.IsKeyPressed(ebiten.KeyM) {
 				g.bats[PlayerRight].MoveDown()
 			} else {
-				g.bats[PlayerLeft].StopMoving()
+				g.bats[PlayerRight].StopMoving()
 			}
 		} else {
 			g.bats[PlayerRight].AI(g.ball.pos.CentreX(), g.ball.pos.CentreY(), g.aiOffset)
@@ -218,19 +218,19 @@ func (g *Game) Reset() {
 
 // Draw game events
 func (g *Game) Draw(screen *ebiten.Image) {
-	screen.DrawImage(images["table"], nil)
+	screen.DrawImage(images[imageTable], nil)
 
 	switch g.state {
 	case StateMenu:
 		if playersSelection == 2 {
-			screen.DrawImage(images["menu1"], nil)
+			screen.DrawImage(images[menuTwoPlayers], nil)
 		} else {
-			screen.DrawImage(images["menu0"], nil)
+			screen.DrawImage(images[menuOnePlayer], nil)
 		}
 	case StatePlaying:
 
 	case StateGameOver:
-		screen.DrawImage(images["over"], nil)
+		screen.DrawImage(images[gameOver], nil)
 	}
 
 	for _, bat := range g.bats {

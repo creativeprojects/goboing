@@ -1,5 +1,6 @@
 package main
 
+// Game defaults
 const (
 	WindowWidth       = 800.0
 	WindowHeight      = 480.0
