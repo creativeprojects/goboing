@@ -21,8 +21,7 @@ var (
 type Bat struct {
 	player *Player
 	images [3]*ebiten.Image
-	op     *ebiten.DrawImageOptions
-	pos    Position
+	sprite *Sprite
 	timer  int
 	status int
 	speed  float64
@@ -44,8 +43,7 @@ func NewBat(player *Player) *Bat {
 			images[imagePrefix+"1"],
 			images[imagePrefix+"2"],
 		},
-		op:     &ebiten.DrawImageOptions{},
-		pos:    NewPositionAbsolute(BatWidth, BatHeight, x, HalfHeight-80),
+		sprite: NewSprite(XLeft, YTop).SetImage(images[imagePrefix+"0"]).MoveTo(x, HalfHeight-80),
 		timer:  0,
 		status: 0,
 		moving: 0,
@@ -61,13 +59,13 @@ func (b *Bat) Update() {
 	if b.timer == 0 && b.status > 0 {
 		b.status = 0
 	}
+	b.sprite.Update()
 }
 
 // Draw bat on the screen
 func (b *Bat) Draw(screen *ebiten.Image) {
-	b.op.GeoM.Reset()
-	b.op.GeoM.Translate(b.pos.AbsoluteX(), b.pos.AbsoluteY())
-	screen.DrawImage(b.images[b.status], b.op)
+	b.sprite.SetImage(b.images[b.status])
+	b.sprite.Draw(screen)
 }
 
 // StopMoving stops the bat and reset to the initial speed
@@ -87,7 +85,7 @@ func (b *Bat) MoveUp() {
 }
 
 func (b *Bat) moveUp(speed float64) {
-	b.pos = b.pos.MoveAbsolute(b.pos.AbsoluteX(), math.Max(batTopY, b.pos.AbsoluteY()-speed))
+	b.sprite.MoveTo(b.sprite.X(XLeft), math.Max(batTopY, b.sprite.Y(YTop)-speed))
 }
 
 // MoveDown moves the bat down at an increasing speed
@@ -102,7 +100,7 @@ func (b *Bat) MoveDown() {
 }
 
 func (b *Bat) moveDown(speed float64) {
-	b.pos = b.pos.MoveAbsolute(b.pos.AbsoluteX(), math.Min(batBottomY, b.pos.AbsoluteY()+speed))
+	b.sprite.MoveTo(b.sprite.X(XLeft), math.Min(batBottomY, b.sprite.Y(YTop)+speed))
 }
 
 // Glow the bat when the ball just touched it
@@ -113,18 +111,18 @@ func (b *Bat) Glow() {
 
 // CentreY returns the position (on the Y axis) of the centre of the bat
 func (b *Bat) CentreY() float64 {
-	return b.pos.CentreY()
+	return b.sprite.Y(YCentre)
 }
 
 // AI player move
 func (b *Bat) AI(ballX, ballY, aiOffset float64) {
-	distanceX := math.Abs(ballX - b.pos.CentreX())
+	distanceX := math.Abs(ballX - b.sprite.X(XCentre))
 	targetY1 := float64(HalfHeight)
 	targetY2 := ballY + aiOffset
 	weight1 := math.Min(1, distanceX/HalfWidth)
 	weight2 := 1 - weight1
 	targetY := (weight1 * targetY1) + (weight2 * targetY2)
-	move := math.Min(AIMaxSpeed, math.Max(-AIMaxSpeed, targetY-b.pos.CentreY()))
+	move := math.Min(AIMaxSpeed, math.Max(-AIMaxSpeed, targetY-b.sprite.Y(YCentre)))
 	switch {
 	case move > 0:
 		b.moveDown(move)

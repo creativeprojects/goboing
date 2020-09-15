@@ -11,8 +11,9 @@ type XType int
 
 // XType
 const (
-	XCentre XType = iota
+	XDefault XType = iota
 	XLeft
+	XCentre
 	XRight
 )
 
@@ -21,8 +22,9 @@ type YType int
 
 // YType
 const (
-	YCentre YType = iota
+	YDefault YType = iota
 	YTop
+	YCentre
 	YBottom
 )
 
