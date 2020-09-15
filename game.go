@@ -133,7 +133,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 				g.bats[PlayerLeft].StopMoving()
 			}
 		} else {
-			g.bats[PlayerLeft].AI(g.ball.pos.CentreX(), g.ball.pos.CentreY(), g.aiOffset)
+			g.bats[PlayerLeft].AI(g.ball.sprite.X(XCentre), g.ball.sprite.Y(YCentre), g.aiOffset)
 		}
 		if g.totalPlayers > 1 {
 			if ebiten.IsKeyPressed(ebiten.KeyK) {
@@ -144,7 +144,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 				g.bats[PlayerRight].StopMoving()
 			}
 		} else {
-			g.bats[PlayerRight].AI(g.ball.pos.CentreX(), g.ball.pos.CentreY(), g.aiOffset)
+			g.bats[PlayerRight].AI(g.ball.sprite.X(XCentre), g.ball.sprite.Y(YCentre), g.aiOffset)
 		}
 		// run impacts first
 		for _, impact := range g.impacts {
@@ -162,7 +162,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 
 		if g.ball.IsOut() {
 			var scoringPlayer, losingPlayer PlayerPosition
-			if g.ball.pos.absoluteX < HalfWidth {
+			if g.ball.sprite.X(XLeft) < HalfWidth {
 				scoringPlayer = PlayerRight
 				losingPlayer = PlayerLeft
 			} else {
@@ -271,13 +271,15 @@ func (g *Game) NewImpact(x, y float64) {
 }
 
 func (g *Game) displayDebug(screen *ebiten.Image) {
-	template := " TPS: %0.2f \n Left bat: %0.0f \n Right bat: %0.0f \n Ball: %0.0f, %0.0f \n Impacts: %d \n Score: %0.0f / %0.0f"
+	template := " TPS: %0.2f \n Left bat: %0.0f \n Right bat: %0.0f \n Ball: %0.0f, %0.0f | %0.0f, %0.0f\n Impacts: %d \n Score: %0.0f / %0.0f"
 	msg := fmt.Sprintf(template,
 		ebiten.CurrentTPS(),
 		g.bats[0].CentreY(),
 		g.bats[1].CentreY(),
 		g.ball.CentreX(),
 		g.ball.CentreY(),
+		g.ball.sprite.X(XCentre),
+		g.ball.sprite.Y(YCentre),
 		len(g.impacts),
 		g.players[PlayerLeft].score,
 		g.players[PlayerRight].score,

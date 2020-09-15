@@ -19,7 +19,6 @@ const (
 type Ball struct {
 	game          *Game
 	image         *ebiten.Image
-	op            *ebiten.DrawImageOptions
 	hitSounds     [5][]byte
 	slowSound     []byte
 	mediumSound   []byte
@@ -27,7 +26,7 @@ type Ball struct {
 	veryfastSound []byte
 	bounceSounds  [5][]byte
 	borderSound   []byte
-	pos           Position
+	sprite        *Sprite
 	dx            float64
 	dy            float64
 	speed         int
@@ -35,9 +34,8 @@ type Ball struct {
 
 // NewBall creates a new ball in the centre of the screen
 func NewBall() *Ball {
-	return (&Ball{
+	return &Ball{
 		image:         images["ball"],
-		op:            &ebiten.DrawImageOptions{},
 		hitSounds:     [5][]byte{sounds["hit0"], sounds["hit1"], sounds["hit2"], sounds["hit3"], sounds["hit4"]},
 		slowSound:     sounds["hit_slow"],
 		mediumSound:   sounds["hit_medium"],
@@ -45,14 +43,14 @@ func NewBall() *Ball {
 		veryfastSound: sounds["hit_veryfast"],
 		bounceSounds:  [5][]byte{sounds["bounce0"], sounds["bounce1"], sounds["bounce2"], sounds["bounce3"], sounds["bounce4"]},
 		borderSound:   sounds["bounce_synth"],
-		pos:           NewPositionCentre(BallWidth, BallHeight, HalfWidth, HalfHeight),
-	})
+		sprite:        NewSprite(XCentre, YCentre).SetImage(images["ball"]),
+	}
 }
 
 // Reset direction, speed and place the ball in the middle of the screen
 // direction is: 1 for going right, -1 for going left
 func (b *Ball) Reset(direction float64) *Ball {
-	b.pos = NewPositionCentre(BallWidth, BallHeight, HalfWidth, HalfHeight)
+	b.sprite.MoveTo(HalfWidth, HalfHeight)
 	b.dx = direction
 	b.dy = 0
 	b.speed = BallStartingSpeed
@@ -64,10 +62,11 @@ func (b *Ball) Update() {
 	// We loop to add the same increment on the ball for n times the speed
 	// The collision detection runs on each incremental step so the ball is not going too far
 	for n := 0; n < b.speed; n++ {
-		previousX := b.pos.AbsoluteX()
-		b.pos = b.pos.MoveRelative(b.dx, b.dy)
+		b.sprite.Update()
+		previousX := b.sprite.X(XLeft)
+		b.sprite.Move(b.dx, b.dy)
 		if b.isCloseToLeftBat(previousX) {
-			difference := b.pos.CentreY() - b.game.bats[PlayerLeft].CentreY()
+			difference := b.sprite.Y(YCentre) - b.game.bats[PlayerLeft].CentreY()
 			if b.isHittingBat(difference) {
 				b.game.bats[PlayerLeft].Glow()
 				b.impactAnimation()
@@ -79,7 +78,7 @@ func (b *Ball) Update() {
 			}
 		}
 		if b.isCloseToRightBat(previousX) {
-			difference := b.pos.CentreY() - b.game.bats[PlayerRight].CentreY()
+			difference := b.sprite.Y(YCentre) - b.game.bats[PlayerRight].CentreY()
 			if b.isHittingBat(difference) {
 				b.game.bats[PlayerRight].Glow()
 				b.impactAnimation()
@@ -90,11 +89,11 @@ func (b *Ball) Update() {
 				continue
 			}
 		}
-		if math.Abs(b.pos.CentreY()-HalfHeight) > 220 {
+		if math.Abs(b.sprite.Y(YCentre)-HalfHeight) > 220 {
 			// move to the other direction
 			b.dy = -b.dy
 			// and get the ball out of the border
-			b.pos = b.pos.MoveRelative(0, b.dy)
+			b.sprite.Move(0, b.dy)
 			b.impactAnimation()
 			b.playHittingBorder()
 		}
@@ -103,32 +102,30 @@ func (b *Ball) Update() {
 
 // IsOut is true when the ball went out of the screen
 func (b *Ball) IsOut() bool {
-	return (b.pos.AbsoluteX() < 0.0) || (b.pos.AbsoluteX()+BallWidth > WindowWidth)
+	return (b.sprite.X(XLeft) < 0.0) || (b.sprite.X(XLeft)+BallWidth > WindowWidth)
 }
 
 // Draw the ball on the screen
 func (b *Ball) Draw(screen *ebiten.Image) {
-	b.op.GeoM.Reset()
-	b.op.GeoM.Translate(b.pos.AbsoluteX(), b.pos.AbsoluteY())
-	screen.DrawImage(b.image, b.op)
+	b.sprite.Draw(screen)
 }
 
 // CentreX returns the position (on the X axis) of the centre of the ball
 func (b *Ball) CentreX() float64 {
-	return b.pos.CentreX()
+	return b.sprite.X(XCentre)
 }
 
 // CentreY returns the position (on the Y axis) of the centre of the ball
 func (b *Ball) CentreY() float64 {
-	return b.pos.CentreY()
+	return b.sprite.Y(YCentre)
 }
 
 func (b *Ball) isCloseToLeftBat(previousX float64) bool {
-	return b.pos.AbsoluteX() <= BatLeftEdge && previousX > BatLeftEdge
+	return b.sprite.X(XLeft) <= BatLeftEdge && previousX > BatLeftEdge
 }
 
 func (b *Ball) isCloseToRightBat(previousX float64) bool {
-	return b.pos.AbsoluteX() >= BatRightEdge && previousX < BatRightEdge
+	return b.sprite.X(XLeft) >= BatRightEdge && previousX < BatRightEdge
 }
 
 func (b *Ball) playHittingBat() {
@@ -161,7 +158,6 @@ func (b *Ball) increaseSpeed() {
 }
 
 func (b *Ball) isHittingBat(difference float64) bool {
-	// return true
 	return difference > -64 && difference < 64
 }
 
