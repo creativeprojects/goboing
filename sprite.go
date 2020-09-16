@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -39,15 +40,18 @@ type Sprite struct {
 	animation []*ebiten.Image
 	sequence  []int
 	rate      int
+	loop      bool
+	started   bool
 	op        *ebiten.DrawImageOptions
 }
 
 // NewSprite creates a new Sprite with default coordinate type
 func NewSprite(xType XType, yType YType) *Sprite {
 	return &Sprite{
-		xType: xType,
-		yType: yType,
-		op:    &ebiten.DrawImageOptions{},
+		xType:   xType,
+		yType:   yType,
+		op:      &ebiten.DrawImageOptions{},
+		started: false,
 	}
 }
 
@@ -59,25 +63,75 @@ func (s *Sprite) SetImage(image *ebiten.Image) *Sprite {
 
 // Update animation (if needed)
 func (s *Sprite) Update() {
+	if !s.started {
+		return
+	}
 	s.frame++
+	if s.frame >= s.rate*len(s.animation) {
+		// animation is finished
+		s.started = false
+	}
 }
 
-// Draw the current image to the screen. If no image has been set, it does nothing
+// Draw the current image, or the animation to the screen. If no image or animation has been set, it does nothing
 func (s *Sprite) Draw(screen *ebiten.Image) {
+	// try animation first
+	if s.started {
+		s.drawAnimation(screen)
+		return
+	}
+	// try single image next
 	if s.image == nil {
 		log.Println("Sprite.Draw: no image to draw")
 		return
 	}
-	width, height := s.image.Size()
+	s.draw(screen, s.image)
+}
+
+func (s *Sprite) draw(screen, image *ebiten.Image) {
+	width, height := image.Size()
 	s.op.GeoM.Reset()
 	s.op.GeoM.Translate(s.xleft(float64(width)), s.ytop(float64(height)))
-	screen.DrawImage(s.image, s.op)
+	screen.DrawImage(image, s.op)
+}
+
+func (s *Sprite) drawAnimation(screen *ebiten.Image) {
+	frameId := int(math.Mod(math.Floor(float64(s.frame/s.rate)), float64(len(s.animation))))
+	image := s.animation[frameId]
+	if image == nil {
+		return
+	}
+	s.draw(screen, image)
 }
 
 // Start (or restart) an animation
 func (s *Sprite) Start() *Sprite {
-	s.frame = 0
+	// only start if the animation is well defined
+	if s.animation != nil && len(s.animation) > 0 && s.rate > 0 {
+		s.frame = 0
+		s.started = true
+	}
 	return s
+}
+
+// Animation defines a new animation (but does not start it yet)
+func (s *Sprite) Animation(animation []*ebiten.Image, sequence []int, rate int, loop bool) *Sprite {
+	s.animation = animation
+	s.sequence = sequence
+	s.rate = rate
+	s.loop = loop
+	return s
+}
+
+// Animate defines a new animation and starts it
+func (s *Sprite) Animate(animation []*ebiten.Image, sequence []int, rate int, loop bool) *Sprite {
+	s.Animation(animation, sequence, rate, loop)
+	return s.Start()
+}
+
+// IsFinished returns true when the animation has finished
+func (s *Sprite) IsFinished() bool {
+	return !s.started
 }
 
 // Move to relative coordinates (adds coordinates to the current position)

@@ -14,4 +14,6 @@ const (
 	BallStartingSpeed = 5
 	BallMaxSpeed      = 20
 	WinningScore      = 10.0
+	GameFullSpeed     = 60
+	GameSlowSpeed     = 30
 )

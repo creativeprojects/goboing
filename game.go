@@ -31,6 +31,7 @@ type Game struct {
 	impacts      []*Impact
 	debug        bool
 	aiOffset     float64
+	slow         bool
 }
 
 // NewGame creates a new game instance and prepares a demo AI game
@@ -122,6 +123,16 @@ func (g *Game) Update(screen *ebiten.Image) error {
 		// Pause
 		if inpututil.IsKeyJustPressed(ebiten.KeyP) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 			g.state = StatePaused
+		}
+
+		// toggle between slow and normal mode
+		if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+			if g.slow {
+				ebiten.SetMaxTPS(GameSlowSpeed)
+			} else {
+				ebiten.SetMaxTPS(GameFullSpeed)
+			}
+			g.slow = !g.slow
 		}
 
 		if g.totalPlayers > 0 {
@@ -262,12 +273,12 @@ func (g *Game) NewImpact(x, y float64) {
 	// Reuse a free impact first
 	for index := 0; index < len(g.impacts); index++ {
 		if g.impacts[index].HasExpired() {
-			g.impacts[index].Reset(x, y)
+			g.impacts[index].Start(x, y)
 			return
 		}
 	}
 	// No one was available
-	g.impacts = append(g.impacts, NewImpact(x, y))
+	g.impacts = append(g.impacts, NewImpact().Start(x, y))
 }
 
 func (g *Game) displayDebug(screen *ebiten.Image) {
