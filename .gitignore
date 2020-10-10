@@ -1,2 +1,4 @@
 .DS_Store
 /boing
+/html/boing.wasm
+/html/wasm_exec.js

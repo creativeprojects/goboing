@@ -10,6 +10,8 @@ BINARY=boing
 TESTS=./...
 COVERAGE_FILE=coverage.out
 
+WASM_DIR=./html/
+
 .PHONY: all test build build-wasm coverage clean resources
 
 all: test build
@@ -18,7 +20,8 @@ build:
 		$(GOBUILD) -o $(BINARY) -v
 
 build-wasm:
-		GOOS=js GOARCH=wasm $(GOBUILD) -o $(BINARY).wasm -v
+		cp $(shell go env GOROOT)/misc/wasm/wasm_exec.js $(WASM_DIR)
+		GOOS=js GOARCH=wasm $(GOBUILD) -o $(WASM_DIR)$(BINARY).wasm -v
 
 test:
 		$(GOTEST) -v $(TESTS)
