@@ -1,5 +1,18 @@
 <!DOCTYPE html>
+<html lang="en">
 <style>
+    @font-face {
+        font-family: 'zorque';
+        src: url('zorque.ttf') format('truetype');
+    }
+
+    body {
+        background-color: black;
+        color: blanchedalmond;
+        font-family: 'zorque';
+        font-size: larger;
+    }
+
     iframe {
         display: block;
         border-style: none;
@@ -8,8 +21,36 @@
         margin: 0 auto;
         background-color: #777;
     }
+
+    .instructions-left {
+        float: left;
+    }
+
+    .instructions-right {
+        float: right;
+    }
+
+    .container {
+        width: 800px;
+        margin: 0 auto;
+    }
 </style>
 
-<body style="background-color: black;">
+<body>
     <iframe src="main.html" allow="autoplay"></iframe>
+    <div class="container">
+        <p></p>
+        <div class="instructions-left">
+            Left player<br /><br />
+            Up: A<br />
+            Down: Z<br />
+        </div>
+        <div class="instructions-right">
+            Right player<br /><br />
+            Up: K<br />
+            Down: M
+        </div>
+    </div>
 </body>
+
+</html>
