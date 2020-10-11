@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/audio"
@@ -52,6 +53,7 @@ func NewGame(audioContext *audio.Context) (*Game, error) {
 		bats:         [2]*Bat{NewBat(player1), NewBat(player2)},
 		ball:         ball,
 		impacts:      make([]*Impact, 0, StartImpacts),
+		debug:        true,
 	}
 	// circular references
 	ball.game = g
@@ -111,6 +113,23 @@ func (g *Game) Update(screen *ebiten.Image) error {
 		// Escape
 		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 			g.Start(0)
+		}
+
+		// Now check for touch events
+		if ids := inpututil.JustPressedTouchIDs(); ids != nil && len(ids) > 0 {
+			for _, id := range ids {
+				x, y := ebiten.TouchPosition(id)
+				if touchInRectangle(x, y, Player1Choice) {
+					playersSelection = 1
+					PlaySE(g.audioContext, sounds["up"])
+					continue
+				}
+				if touchInRectangle(x, y, Player2Choice) {
+					playersSelection = 2
+					PlaySE(g.audioContext, sounds["down"])
+					continue
+				}
+			}
 		}
 		return nil
 	}
@@ -282,7 +301,7 @@ func (g *Game) NewImpact(x, y float64) {
 }
 
 func (g *Game) displayDebug(screen *ebiten.Image) {
-	template := " TPS: %0.2f \n Left bat: %0.0f \n Right bat: %0.0f \n Ball: %0.0f, %0.0f | %0.0f, %0.0f\n Impacts: %d \n Score: %0.0f / %0.0f"
+	template := " TPS: %0.2f \n Left bat: %0.0f \n Right bat: %0.0f \n Ball: %0.0f, %0.0f | %0.0f, %0.0f\n Impacts: %d \n Score: %0.0f / %0.0f \n Touch: %s"
 	msg := fmt.Sprintf(template,
 		ebiten.CurrentTPS(),
 		g.bats[0].CentreY(),
@@ -294,6 +313,25 @@ func (g *Game) displayDebug(screen *ebiten.Image) {
 		len(g.impacts),
 		g.players[PlayerLeft].score,
 		g.players[PlayerRight].score,
+		debugTouch(),
 	)
 	ebitenutil.DebugPrint(screen, msg)
+}
+
+func debugTouch() string {
+	ids := ebiten.TouchIDs()
+	if ids == nil || len(ids) == 0 {
+		return "n/a"
+	}
+	values := make([]string, 0, len(ids))
+	for _, id := range ids {
+		x, y := ebiten.TouchPosition(id)
+		values = append(values, fmt.Sprintf("(%d, %d)", x, y))
+	}
+	return strings.Join(values, " - ")
+}
+
+func touchInRectangle(x, y int, rectangle [2][2]int) bool {
+	return x >= rectangle[0][0] && x <= rectangle[1][0] &&
+		y >= rectangle[0][1] && y <= rectangle[1][1]
 }

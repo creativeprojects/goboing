@@ -17,3 +17,8 @@ const (
 	GameFullSpeed     = 60
 	GameSlowSpeed     = 30
 )
+
+var (
+	Player1Choice = [2][2]int{{200, 290}, {600, 340}}
+	Player2Choice = [2][2]int{{200, 370}, {600, 420}}
+)
