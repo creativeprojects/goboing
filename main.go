@@ -50,6 +50,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	setupJavascriptCallback(game)
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}

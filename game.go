@@ -53,7 +53,7 @@ func NewGame(audioContext *audio.Context) (*Game, error) {
 		bats:         [2]*Bat{NewBat(player1), NewBat(player2)},
 		ball:         ball,
 		impacts:      make([]*Impact, 0, StartImpacts),
-		debug:        true,
+		debug:        false,
 	}
 	// circular references
 	ball.game = g
