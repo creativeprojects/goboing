@@ -96,126 +96,11 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	}
 
 	if g.state == StateMenu {
-
-		if inpututil.IsKeyJustPressed(ebiten.KeyDown) && playersSelection == 1 {
-			playersSelection = 2
-			PlaySE(g.audioContext, sounds["down"])
-		}
-		if inpututil.IsKeyJustPressed(ebiten.KeyUp) && playersSelection == 2 {
-			playersSelection = 1
-			PlaySE(g.audioContext, sounds["up"])
-		}
-
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			g.Start(playersSelection)
-		}
-
-		// Escape
-		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-			g.Start(0)
-		}
-
-		// Now check for touch events
-		if ids := inpututil.JustPressedTouchIDs(); ids != nil && len(ids) > 0 {
-			for _, id := range ids {
-				x, y := ebiten.TouchPosition(id)
-				if touchInRectangle(x, y, Player1Choice) {
-					playersSelection = 1
-					PlaySE(g.audioContext, sounds["up"])
-					continue
-				}
-				if touchInRectangle(x, y, Player2Choice) {
-					playersSelection = 2
-					PlaySE(g.audioContext, sounds["down"])
-					continue
-				}
-			}
-		}
+		g.UpdateMenu(screen)
 		return nil
 	}
 	if g.state == StatePlaying {
-		// Escape
-		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-			g.Reset()
-			g.state = StateMenu
-		}
-		// Pause
-		if inpututil.IsKeyJustPressed(ebiten.KeyP) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-			g.state = StatePaused
-		}
-
-		// toggle between slow and normal mode
-		if inpututil.IsKeyJustPressed(ebiten.KeyS) {
-			if g.slow {
-				ebiten.SetMaxTPS(GameSlowSpeed)
-			} else {
-				ebiten.SetMaxTPS(GameFullSpeed)
-			}
-			g.slow = !g.slow
-		}
-
-		if g.totalPlayers > 0 {
-			if ebiten.IsKeyPressed(ebiten.KeyA) {
-				g.bats[PlayerLeft].MoveUp()
-			} else if ebiten.IsKeyPressed(ebiten.KeyZ) {
-				g.bats[PlayerLeft].MoveDown()
-			} else {
-				g.bats[PlayerLeft].StopMoving()
-			}
-		} else {
-			g.bats[PlayerLeft].AI(g.ball.sprite.X(XCentre), g.ball.sprite.Y(YCentre), g.aiOffset)
-		}
-		if g.totalPlayers > 1 {
-			if ebiten.IsKeyPressed(ebiten.KeyK) {
-				g.bats[PlayerRight].MoveUp()
-			} else if ebiten.IsKeyPressed(ebiten.KeyM) {
-				g.bats[PlayerRight].MoveDown()
-			} else {
-				g.bats[PlayerRight].StopMoving()
-			}
-		} else {
-			g.bats[PlayerRight].AI(g.ball.sprite.X(XCentre), g.ball.sprite.Y(YCentre), g.aiOffset)
-		}
-		// run impacts first
-		for _, impact := range g.impacts {
-			impact.Update()
-		}
-
-		for _, bat := range g.bats {
-			bat.Update()
-		}
-		g.ball.Update()
-
-		for _, player := range g.players {
-			player.Update()
-		}
-
-		if g.ball.IsOut() {
-			var scoringPlayer, losingPlayer PlayerPosition
-			if g.ball.sprite.X(XLeft) < HalfWidth {
-				scoringPlayer = PlayerRight
-				losingPlayer = PlayerLeft
-			} else {
-				scoringPlayer = PlayerLeft
-				losingPlayer = PlayerRight
-			}
-			if g.players[losingPlayer].State() == PlayerStatePlaying {
-				g.players[scoringPlayer].BallWin()
-				g.players[losingPlayer].BallLost()
-				g.SoundEffect(sounds["score_goal"])
-			}
-			if g.players[losingPlayer].State() == PlayerStateReady {
-				direction := 1.0
-				if losingPlayer == PlayerLeft {
-					direction = -1
-				}
-				g.ball.Reset(direction)
-			}
-			if g.players[scoringPlayer].State() == PlayerWinningScore {
-				// Game finished!
-				g.state = StateGameOver
-			}
-		}
+		g.UpdatePlaying(screen)
 		return nil
 	}
 
@@ -234,6 +119,173 @@ func (g *Game) Update(screen *ebiten.Image) error {
 			g.state = StateMenu
 		}
 		return nil
+	}
+	return nil
+}
+
+func (g *Game) UpdateMenu(screen *ebiten.Image) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyDown) && playersSelection == 1 {
+		playersSelection = 2
+		PlaySE(g.audioContext, sounds["down"])
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyUp) && playersSelection == 2 {
+		playersSelection = 1
+		PlaySE(g.audioContext, sounds["up"])
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		g.Start(playersSelection)
+	}
+
+	// Escape
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+		g.Start(0)
+	}
+
+	// Now check for touch events
+	if ids := inpututil.JustPressedTouchIDs(); ids != nil && len(ids) > 0 {
+		for _, id := range ids {
+			x, y := ebiten.TouchPosition(id)
+			if touchInRectangle(x, y, Player1Choice) {
+				if playersSelection == 1 {
+					// Start the game
+					g.Start(playersSelection)
+					continue
+				}
+				playersSelection = 1
+				PlaySE(g.audioContext, sounds["up"])
+				continue
+			}
+			if touchInRectangle(x, y, Player2Choice) {
+				if playersSelection == 2 {
+					// Start the game
+					g.Start(playersSelection)
+					continue
+				}
+				playersSelection = 2
+				PlaySE(g.audioContext, sounds["down"])
+				continue
+			}
+		}
+	}
+}
+
+func (g *Game) UpdatePlaying(screen *ebiten.Image) error {
+	// Escape
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+		g.Reset()
+		g.state = StateMenu
+	}
+	// Pause
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		g.state = StatePaused
+	}
+
+	// toggle between slow and normal mode
+	if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		if g.slow {
+			ebiten.SetMaxTPS(GameSlowSpeed)
+		} else {
+			ebiten.SetMaxTPS(GameFullSpeed)
+		}
+		g.slow = !g.slow
+	}
+
+	// get touch events if any
+	hasLeftTouch, hasRightTouch := false, false
+	leftTouchY, rightTouchY := 0, 0
+	touchIDs := ebiten.TouchIDs()
+	if touchIDs != nil && len(touchIDs) > 0 {
+		for _, touchID := range touchIDs {
+			// we only accept one touch on each side of the screen
+			x, y := ebiten.TouchPosition(touchID)
+			if x < 200 {
+				if hasLeftTouch {
+					continue
+				}
+				hasLeftTouch = true
+				leftTouchY = y
+			} else if x > 600 {
+				if hasRightTouch {
+					continue
+				}
+				hasRightTouch = true
+				rightTouchY = y
+			}
+		}
+	}
+
+	if g.totalPlayers > 0 {
+		if ebiten.IsKeyPressed(ebiten.KeyA) {
+			g.bats[PlayerLeft].MoveUp()
+		} else if ebiten.IsKeyPressed(ebiten.KeyZ) {
+			g.bats[PlayerLeft].MoveDown()
+		} else {
+			g.bats[PlayerLeft].StopMoving()
+		}
+
+		// left touch?
+		if hasLeftTouch {
+			g.bats[PlayerLeft].MoveTo(float64(leftTouchY - 80))
+		}
+	} else {
+		g.bats[PlayerLeft].AI(g.ball.sprite.X(XCentre), g.ball.sprite.Y(YCentre), g.aiOffset)
+	}
+	if g.totalPlayers > 1 {
+		if ebiten.IsKeyPressed(ebiten.KeyK) {
+			g.bats[PlayerRight].MoveUp()
+		} else if ebiten.IsKeyPressed(ebiten.KeyM) {
+			g.bats[PlayerRight].MoveDown()
+		} else {
+			g.bats[PlayerRight].StopMoving()
+		}
+
+		// right touch?
+		if hasRightTouch {
+			g.bats[PlayerRight].MoveTo(float64(rightTouchY - 80))
+		}
+	} else {
+		g.bats[PlayerRight].AI(g.ball.sprite.X(XCentre), g.ball.sprite.Y(YCentre), g.aiOffset)
+	}
+	// run impacts first
+	for _, impact := range g.impacts {
+		impact.Update()
+	}
+
+	for _, bat := range g.bats {
+		bat.Update()
+	}
+	g.ball.Update()
+
+	for _, player := range g.players {
+		player.Update()
+	}
+
+	if g.ball.IsOut() {
+		var scoringPlayer, losingPlayer PlayerPosition
+		if g.ball.sprite.X(XLeft) < HalfWidth {
+			scoringPlayer = PlayerRight
+			losingPlayer = PlayerLeft
+		} else {
+			scoringPlayer = PlayerLeft
+			losingPlayer = PlayerRight
+		}
+		if g.players[losingPlayer].State() == PlayerStatePlaying {
+			g.players[scoringPlayer].BallWin()
+			g.players[losingPlayer].BallLost()
+			g.SoundEffect(sounds["score_goal"])
+		}
+		if g.players[losingPlayer].State() == PlayerStateReady {
+			direction := 1.0
+			if losingPlayer == PlayerLeft {
+				direction = -1
+			}
+			g.ball.Reset(direction)
+		}
+		if g.players[scoringPlayer].State() == PlayerWinningScore {
+			// Game finished!
+			g.state = StateGameOver
+		}
 	}
 	return nil
 }

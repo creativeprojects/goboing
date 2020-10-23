@@ -20,6 +20,8 @@ github.com/hajimehoshi/ebiten v1.11.8 h1:SfB35Bt8b0MvEDwpwOtG3NwfUlzZKcM63NnCD/z
 github.com/hajimehoshi/ebiten v1.11.8/go.mod h1:0GYrrt8zmQ7WmeUQo+PVy8XQdaDlEd2poAQaonXmGww=
 github.com/hajimehoshi/ebiten v1.12.1 h1:6FhmF7VmZjy+tXZXzjujcqej0ETV/D502kR1BSRJSAU=
 github.com/hajimehoshi/ebiten v1.12.1/go.mod h1:0G/t1zdc19XZSPb9YggXN940uglPa6acoqD0+/vy2Qg=
+github.com/hajimehoshi/ebiten v1.12.2 h1:oh+5xyViL0HB+FW/vSCn4QqGlR0hsftGNhxR6qbIxEI=
+github.com/hajimehoshi/ebiten v1.12.2/go.mod h1:9JW9BAz1+swszT0SXR8VUvNvDafs9VspevAcY+KPlV8=
 github.com/hajimehoshi/file2byteslice v0.0.0-20200812174855-0e5e8a80490e/go.mod h1:CqqAHp7Dk/AqQiwuhV1yT2334qbA/tFWQW0MD2dGqUE=
 github.com/hajimehoshi/go-mp3 v0.2.1/go.mod h1:Rr+2P46iH6PwTPVgSsEwBkon0CK5DxCAeX/Rp65DCTE=
 github.com/hajimehoshi/go-mp3 v0.3.1/go.mod h1:qMJj/CSDxx6CGHiZeCgbiq2DSUkbK0UbtXShQcnfyMM=
@@ -29,6 +31,8 @@ github.com/hajimehoshi/oto v0.6.3 h1:NfrHdINv+7J8JhfkbHBROlWCzFSWc9PaHm2lS90KNzY
 github.com/hajimehoshi/oto v0.6.3/go.mod h1:0QXGEkbuJRohbJaxr7ZQSxnju7hEhseiPx2hrh6raOI=
 github.com/hajimehoshi/oto v0.6.5-0.20200917193348-57f376f2c835 h1:FTEMMDZMtWih3iyGYpACeIrk4zClxwPPFYky6jgBpkc=
 github.com/hajimehoshi/oto v0.6.5-0.20200917193348-57f376f2c835/go.mod h1:0QXGEkbuJRohbJaxr7ZQSxnju7hEhseiPx2hrh6raOI=
+github.com/hajimehoshi/oto v0.6.6 h1:HYSZ8cYZqOL4iHugvbcfhNN2smiSOsBMaoSBi4nnWcw=
+github.com/hajimehoshi/oto v0.6.6/go.mod h1:0QXGEkbuJRohbJaxr7ZQSxnju7hEhseiPx2hrh6raOI=
 github.com/hajimehoshi/wasmserve v0.0.0-20200812063057-947821f8a49c h1:QKZDQOILjjnB6bwUY2wktUjVFk5Nv47UXL/BFqnnLWM=
 github.com/hajimehoshi/wasmserve v0.0.0-20200812063057-947821f8a49c/go.mod h1:DI8IeyYdAkNS/K9JvLFBab7cmOkvoLCvMS9U8hLP2tw=
 github.com/hajimehoshi/wasmserve v0.0.0-20200921065616-c95bb0de031e h1:NrmopPQTXcpEsajEa9E8cQTKUEBgWZ1cF0FmFM3Vfcg=

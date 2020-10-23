@@ -84,10 +84,6 @@ func (b *Bat) MoveUp() {
 	b.speed++
 }
 
-func (b *Bat) moveUp(speed float64) {
-	b.sprite.MoveTo(b.sprite.X(XLeft), math.Max(batTopY, b.sprite.Y(YTop)-speed))
-}
-
 // MoveDown moves the bat down at an increasing speed
 func (b *Bat) MoveDown() {
 	if b.moving < 1 {
@@ -97,6 +93,15 @@ func (b *Bat) MoveDown() {
 	}
 	b.moveDown(b.speed)
 	b.speed++
+}
+
+// MoveTo moves the bat to a specific position on the Y axis
+func (b *Bat) MoveTo(y float64) {
+	b.sprite.MoveTo(b.sprite.X(XLeft), math.Min(batBottomY, math.Max(batTopY, y)))
+}
+
+func (b *Bat) moveUp(speed float64) {
+	b.sprite.MoveTo(b.sprite.X(XLeft), math.Max(batTopY, b.sprite.Y(YTop)-speed))
 }
 
 func (b *Bat) moveDown(speed float64) {
