@@ -1,5 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+<style>
+    @font-face {
+        font-family: 'zorque';
+        src: url('zorque.ttf') format('truetype');
+    }
+
+    body {
+        background-color: black;
+        color: blanchedalmond;
+        font-family: 'zorque';
+    }
+</style>
 <script src="wasm_exec.js"></script>
 <script>
     // Polyfill
@@ -12,8 +24,13 @@
 
     const go = new Go();
     WebAssembly.instantiateStreaming(fetch("boing.wasm"), go.importObject).then(result => {
+        const element = document.getElementById("wait")
+        if (element) {
+            element.style = "display: none;"
+        }
         go.run(result.instance);
     });
 </script>
+<div id="wait">Please wait loading game...</div>
 
 </html>
