@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branch: master
-    # tags:
-    #   - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    # branch: master
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
 
@@ -100,44 +100,44 @@ jobs:
 
       - name: Display structure of downloaded files
         run: ls -R
-        
-    #   - name: Create Release
-    #     id: create_release
-    #     uses: actions/create-release@v1
-    #     env:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-    #     with:
-    #       tag_name: ${{ github.ref }}
-    #       release_name: Release ${{ github.ref }}
-    #       draft: false
-    #       prerelease: false
 
-    #   - name: Upload Windows Binary
-    #     uses: actions/upload-release-asset@v1
-    #     env:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     with:
-    #       upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`
-    #       asset_path: ./boing_windows.zip
-    #       asset_name: boing_windows.zip
-    #       asset_content_type: application/zip
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
 
-    #   - name: Upload Linux Binary
-    #     uses: actions/upload-release-asset@v1
-    #     env:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     with:
-    #       upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`
-    #       asset_path: ./boing_linux.gz/boing_linux.gz
-    #       asset_name: boing_linux.gz
-    #       asset_content_type: application/gzip
+      - name: Upload Windows Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`
+          asset_path: ./boing_windows.zip
+          asset_name: boing_windows.zip
+          asset_content_type: application/zip
 
-    #   - name: Upload macOS Binary
-    #     uses: actions/upload-release-asset@v1
-    #     env:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     with:
-    #       upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`
-    #       asset_path: ./boing_darwin.gz/boing_darwin.gz
-    #       asset_name: boing_darwin.gz
-    #       asset_content_type: application/gzip
+      - name: Upload Linux Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`
+          asset_path: ./boing_linux.gz/boing.gz
+          asset_name: boing_linux.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`
+          asset_path: ./boing_darwin.gz/boing.gz
+          asset_name: boing_darwin.gz
+          asset_content_type: application/gzip
