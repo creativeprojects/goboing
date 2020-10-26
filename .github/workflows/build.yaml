@@ -25,6 +25,15 @@ jobs:
     - name: Build
       run: go build -v .
 
+    - name: Compress
+      run: gzip --best --keep boing
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: boing-linux.gz
+        path: boing.gz
+        
   windows:
     name: Windows Build
     runs-on: windows-latest
@@ -41,6 +50,12 @@ jobs:
     - name: Build
       run: go build -v .
 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: boing.exe
+        path: boing.exe
+
   mac:
     name: macOS Build
     runs-on: macos-latest
@@ -56,3 +71,12 @@ jobs:
 
     - name: Build
       run: go build -v .
+
+    - name: Compress
+      run: gzip --best --keep boing
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: boing-darwin.gz
+        path: boing.gz

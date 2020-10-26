@@ -22,6 +22,7 @@ build:
 build-wasm:
 		cp $(shell go env GOROOT)/misc/wasm/wasm_exec.js $(WASM_DIR)
 		GOOS=js GOARCH=wasm $(GOBUILD) -o $(WASM_DIR)$(BINARY).wasm -v
+		gzip --keep --best $(WASM_DIR)$(BINARY).wasm
 
 test:
 		$(GOTEST) -v $(TESTS)
