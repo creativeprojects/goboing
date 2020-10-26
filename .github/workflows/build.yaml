@@ -91,6 +91,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Compress artifacts
+        run: zip -9 boing_windows.zip boing.exe
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
