@@ -2,11 +2,12 @@ name: Build
 
 on:
   push:
-    branches: [ master ]
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
 
-  linux:
+  linux_build:
     name: Linux Build
     runs-on: ubuntu-latest
     steps:
@@ -34,7 +35,7 @@ jobs:
         name: boing-linux.gz
         path: boing.gz
         
-  windows:
+  windows_build:
     name: Windows Build
     runs-on: windows-latest
     steps:
@@ -56,7 +57,7 @@ jobs:
         name: boing.exe
         path: boing.exe
 
-  mac:
+  macos_build:
     name: macOS Build
     runs-on: macos-latest
     steps:
@@ -80,3 +81,53 @@ jobs:
       with:
         name: boing-darwin.gz
         path: boing.gz
+
+  publish:
+    name: Publish Release
+    needs:
+      - linux_build
+      - windows_build
+      - macos_build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Windows Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`
+          asset_path: ./boing.exe
+          asset_name: boing.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`
+          asset_path: ./boing-linux.gz
+          asset_name: boing-linux.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`
+          asset_path: ./boing-darwin.gz
+          asset_name: boing-darwin.gz
+          asset_content_type: application/gzip
