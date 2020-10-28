@@ -6,9 +6,9 @@ import (
 
 	_ "image/png"
 
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/audio"
-	"github.com/hajimehoshi/ebiten/audio/vorbis"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"github.com/markbates/pkger"
 )
 
@@ -24,10 +24,7 @@ func loadImages(imageNames []string) (map[string]*ebiten.Image, error) {
 		if err != nil {
 			return imagesMap, fmt.Errorf("%s: %w", imageName, err)
 		}
-		img2, err := ebiten.NewImageFromImage(img, ebiten.FilterDefault)
-		if err != nil {
-			return imagesMap, fmt.Errorf("%s: %w", imageName, err)
-		}
+		img2 := ebiten.NewImageFromImage(img)
 		imagesMap[imageName] = img2
 	}
 	return imagesMap, nil
@@ -45,7 +42,6 @@ func loadSounds(context *audio.Context, soundNames []string) (map[string][]byte,
 		if err != nil {
 			return soundsMap, fmt.Errorf("%s: %w", soundName, err)
 		}
-		defer snd.Close()
 		buf := make([]byte, snd.Length())
 		_, err = snd.Read(buf)
 		if err != nil {

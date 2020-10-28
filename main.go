@@ -4,8 +4,8 @@ import (
 	_ "image/png"
 	"log"
 
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/audio"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 // Images
@@ -33,10 +33,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	audioContext, err := audio.NewContext(SampleRate)
-	if err != nil {
-		log.Fatal(err)
-	}
+	audioContext := audio.NewContext(SampleRate)
 
 	sounds, err = loadSounds(audioContext, soundNames)
 	if err != nil {

@@ -6,10 +6,10 @@ import (
 	"math/rand"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/audio"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
-	"github.com/hajimehoshi/ebiten/inpututil"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const (
@@ -89,18 +89,18 @@ func (g *Game) Start(players int) *Game {
 }
 
 // Update game events
-func (g *Game) Update(screen *ebiten.Image) error {
+func (g *Game) Update() error {
 	// Debug
 	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
 		g.debug = !g.debug
 	}
 
 	if g.state == StateMenu {
-		g.UpdateMenu(screen)
+		g.UpdateMenu()
 		return nil
 	}
 	if g.state == StatePlaying {
-		g.UpdatePlaying(screen)
+		g.UpdatePlaying()
 		return nil
 	}
 
@@ -123,7 +123,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	return nil
 }
 
-func (g *Game) UpdateMenu(screen *ebiten.Image) {
+func (g *Game) UpdateMenu() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyDown) && playersSelection == 1 {
 		playersSelection = 2
 		PlaySE(g.audioContext, sounds["down"])
@@ -170,7 +170,7 @@ func (g *Game) UpdateMenu(screen *ebiten.Image) {
 	}
 }
 
-func (g *Game) UpdatePlaying(screen *ebiten.Image) error {
+func (g *Game) UpdatePlaying() error {
 	// Escape
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		g.Reset()
