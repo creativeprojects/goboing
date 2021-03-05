@@ -1,8 +1,5 @@
 module github.com/creativeprojects/boing
 
-go 1.14
+go 1.16
 
-require (
-	github.com/hajimehoshi/ebiten/v2 v2.0.0
-	github.com/markbates/pkger v0.17.1
-)
+require github.com/hajimehoshi/ebiten/v2 v2.0.6
